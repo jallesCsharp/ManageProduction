@@ -2,14 +2,8 @@
 using Manage.Infra.Context;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MySql.Data.MySqlClient;
 
 namespace Manage.IOC.IOC
 {
@@ -25,35 +19,35 @@ namespace Manage.IOC.IOC
             return services;
         }
 
-        public static IServiceCollection AddDbContextInjector(this IServiceCollection services, ConnectionStrings teste)
+        public static IServiceCollection AddDbContextInjector(this IServiceCollection services, ConnectionStrings connectionStrings)
         {
-            services.AddSingleton(teste);
-            switch (teste.TipoString)
+            services.AddSingleton(connectionStrings);
+            switch (connectionStrings.TipoString)
             {
                 case "SQL":
-                    SqlConnectionStringBuilder stringBuillder = new SqlConnectionStringBuilder()
+                    SqlConnectionStringBuilder stringBuillderSqlServer = new SqlConnectionStringBuilder()
                     {
-                        DataSource = teste.Server,
-                        InitialCatalog = teste.InitialCatalog,
-                        UserID = teste.UserID,
-                        Password = teste.Password
+                        DataSource = connectionStrings.Server,
+                        InitialCatalog = connectionStrings.InitialCatalog,
+                        UserID = connectionStrings.UserID,
+                        Password = connectionStrings.Password
                     };
                     services.AddDbContext<ManageProductionDbContext>(options =>
-                        options.UseSqlServer(stringBuillder.ConnectionString));
+                        options.UseSqlServer(stringBuillderSqlServer.ConnectionString));
                     break;
-                //case "MYSQL":
-                //    MySqlConnectionStringBuilder stringBuillder1 = new MySqlConnectionStringBuilder()
-                //    {
-                //        Server = teste.Server,
-                //        Database = teste.InitialCatalog,
-                //        UserID = teste.UserID,
-                //        Password = teste.Password,
-                //        Port = 3306,
-                //        //Port = XConfig.Porta.AsUInt32()
-                //    };
-                //    services.AddDbContext<ManageProductionDbContext>(options =>
-                //        options.UseMySQL(stringBuillder1.ConnectionString));
-                //    break;
+                case "MYSQL":
+                    MySqlConnectionStringBuilder stringBuillderMysql = new MySqlConnectionStringBuilder()
+                    {
+                        Server = connectionStrings.Server,
+                        Database = connectionStrings.InitialCatalog,
+                        UserID = connectionStrings.UserID,
+                        Password = connectionStrings.Password,
+                        Port = 3306,
+                        //Port = XConfig.Porta.AsUInt32()
+                    };
+                    services.AddDbContext<ManageProductionDbContext>(options =>
+                        options.UseSqlServer(stringBuillderMysql.ConnectionString));
+                    break;
             }
             
             
